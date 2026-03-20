@@ -1,7 +1,6 @@
 import streamlit as st
 from openai import OpenAI
 
-# ✅ Load API from Streamlit Secrets (secure)
 client = OpenAI(
     api_key=st.secrets["GROQ_API_KEY"],
     base_url="https://api.groq.com/openai/v1"
@@ -9,7 +8,6 @@ client = OpenAI(
 
 DIET_PROMPT = """
 You are a professional diet planner.
-
 Create a personalized Indian diet plan based on:
 - Medical conditions
 - Abnormal test values
@@ -34,8 +32,6 @@ def generate_diet_plan(structured_data):
                 {"role": "user", "content": str(structured_data)}
             ]
         )
-
         return response.choices[0].message.content
-
     except Exception as e:
         return f"Error generating diet plan: {str(e)}"

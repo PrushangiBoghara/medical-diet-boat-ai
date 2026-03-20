@@ -2,7 +2,6 @@ import streamlit as st
 from openai import OpenAI
 import json
 
-# ✅ Load API from Streamlit Secrets (secure)
 client = OpenAI(
     api_key=st.secrets["GROQ_API_KEY"],
     base_url="https://api.groq.com/openai/v1"
@@ -10,10 +9,8 @@ client = OpenAI(
 
 MODEL = st.secrets["GROQ_MODEL"]
 
-# ✅ STRONG EXTRACTION PROMPT (No fake data)
 EXTRACTION_PROMPT = """
 You are a medical data extraction system.
-
 Your job is to extract ONLY real information from the given medical report text.
 
 STRICT RULES:
@@ -24,7 +21,6 @@ STRICT RULES:
 - Extract only visible and meaningful medical data
 
 Return ONLY valid JSON in this format:
-
 {
   "patient": {
     "age": "",
@@ -42,22 +38,15 @@ Return ONLY valid JSON in this format:
 }
 """
 
-# ✅ Safe JSON parser
 def safe_json_load(text):
     try:
         return json.loads(text)
     except:
-        return {
-            "error": "Invalid JSON from model",
-            "raw_output": text
-        }
+        return {"error": "Invalid JSON from model", "raw_output": text}
 
-# ✅ Main extraction function
 def extract_medical_data(ocr_text):
     if not ocr_text or len(ocr_text.strip()) < 20:
-        return {
-            "error": "No valid text extracted from report"
-        }
+        return {"error": "No valid text extracted from report"}
 
     try:
         response = client.chat.completions.create(
@@ -71,13 +60,9 @@ def extract_medical_data(ocr_text):
 
         raw_output = response.choices[0].message.content.strip()
 
-        # 🧹 Remove markdown formatting
         if raw_output.startswith("```"):
             raw_output = raw_output.replace("```json", "").replace("```", "").strip()
 
         return safe_json_load(raw_output)
-
     except Exception as e:
-        return {
-            "error": f"Extraction failed: {str(e)}"
-        }
+        return {"error": f"Extraction failed: {str(e)}"}
